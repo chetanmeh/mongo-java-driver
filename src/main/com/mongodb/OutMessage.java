@@ -20,6 +20,8 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONEncoder;
 import org.bson.io.PoolOutputBuffer;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,6 +50,7 @@ class OutMessage extends BasicBSONEncoder {
     }
 
     static AtomicInteger REQUEST_ID = new AtomicInteger(1);
+    static Logger LOG = LoggerFactory.getLogger(OutMessage.class);
 
     public static OutMessage insert(final DBCollection collection, final DBEncoder encoder, WriteConcern concern) {
         OutMessage om = new OutMessage(collection, OpCode.OP_INSERT, encoder);
@@ -231,6 +234,18 @@ class OutMessage extends BasicBSONEncoder {
     void pipe( OutputStream out ) throws IOException {
         if (_buffer == null) {
             throw new IllegalStateException("Already closed");
+        }
+
+        if(LOG.isDebugEnabled()){
+            String name = "[" +_collection.getName() + "]";
+            if(_opCode == OpCode.OP_QUERY){
+                String prefix = "";
+                if(! "$cmd".equals(_collection.getName())){
+                    prefix = "[" +_collection.getName() + "] ";
+                }
+                name = prefix + _query.toString();
+            }
+            LOG.debug("{} Request : Op {}, {}",new Object[]{_id,_opCode.name(),name});
         }
 
         _buffer.pipe( out );
