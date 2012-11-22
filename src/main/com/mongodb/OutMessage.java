@@ -239,7 +239,7 @@ class OutMessage extends BasicBSONEncoder {
         _buffer.pipe( out );
     }
 
-    String getQueryDetails(long delta){
+    String getQueryDetails(long delta, String stackTrace){
         String name = "[" +_collection.getName() + "]";
         if(_opCode == OpCode.OP_QUERY){
             String prefix = "";
@@ -250,10 +250,14 @@ class OutMessage extends BasicBSONEncoder {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("Request : ")
-          .append(_id)
-          .append(" (").append(delta).append("ms) ")
+          .append("Id: ").append(_id)
+          .append(" (").append(delta).append(" ms) ")
           .append(_opCode.name())
           .append(", ").append(name);
+
+        if(stackTrace != null){
+            sb.append(stackTrace);
+        }
         return sb.toString();
     }
 

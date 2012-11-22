@@ -25,6 +25,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Map;
@@ -47,6 +49,7 @@ public class DBPort {
     
     static final long CONN_RETRY_TIME_MS = 15000;
     static org.slf4j.Logger LOG = LoggerFactory.getLogger(DBPort.class);
+    static org.slf4j.Logger STACK_TRACE_LOG = LoggerFactory.getLogger("stacktrace.mongo");
 
     /**
      * creates a new DBPort
@@ -135,8 +138,24 @@ public class DBPort {
             _activeState = null;
             _processingResponse = false;
             if(LOG.isDebugEnabled()){
+                String stackTrace = null;
+                if(STACK_TRACE_LOG.isTraceEnabled()){
+                    StringWriter sw = new StringWriter();
+                    PrintWriter pw = new PrintWriter(sw);
+                    pw.println();
+                    pw.println("Current thread's stacktrace is");
+                    StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+                    for(StackTraceElement st : trace){
+                        pw.print("\t");
+                        pw.println(st);
+                    }
+                    pw.flush();
+                    stackTrace = sw.toString();
+                }
                 long delta = System.currentTimeMillis() - start;
-                LOG.debug(msg.getQueryDetails(delta));
+                LOG.debug(msg.getQueryDetails(delta,stackTrace));
+
+
             }
         }
     }
