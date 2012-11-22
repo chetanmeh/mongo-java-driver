@@ -19,6 +19,7 @@
 package com.mongodb;
 
 import com.mongodb.util.ThreadUtil;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -45,6 +46,7 @@ public class DBPort {
     static final boolean USE_NAGLE = false;
     
     static final long CONN_RETRY_TIME_MS = 15000;
+    static org.slf4j.Logger LOG = LoggerFactory.getLogger(DBPort.class);
 
     /**
      * creates a new DBPort
@@ -109,9 +111,11 @@ public class DBPort {
         if ( _out == null )
             throw new IllegalStateException( "_out shouldn't be null" );
 
+        long start = System.currentTimeMillis();
         try {
             msg.prepare();
             _activeState = new ActiveState(msg);
+
             msg.pipe( _out );
 
             if ( _pool != null )
@@ -130,6 +134,10 @@ public class DBPort {
         finally {
             _activeState = null;
             _processingResponse = false;
+            if(LOG.isDebugEnabled()){
+                long delta = System.currentTimeMillis() - start;
+                LOG.debug(msg.getQueryDetails(delta));
+            }
         }
     }
 

@@ -236,19 +236,25 @@ class OutMessage extends BasicBSONEncoder {
             throw new IllegalStateException("Already closed");
         }
 
-        if(LOG.isDebugEnabled()){
-            String name = "[" +_collection.getName() + "]";
-            if(_opCode == OpCode.OP_QUERY){
-                String prefix = "";
-                if(! "$cmd".equals(_collection.getName())){
-                    prefix = "[" +_collection.getName() + "] ";
-                }
-                name = prefix + _query.toString();
-            }
-            LOG.debug("{} Request : Op {}, {}",new Object[]{_id,_opCode.name(),name});
-        }
-
         _buffer.pipe( out );
+    }
+
+    String getQueryDetails(long delta){
+        String name = "[" +_collection.getName() + "]";
+        if(_opCode == OpCode.OP_QUERY){
+            String prefix = "";
+            if(! "$cmd".equals(_collection.getName())){
+                prefix = "[" +_collection.getName() + "] ";
+            }
+            name = prefix + _query.toString();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Request : ")
+          .append(_id)
+          .append(" (").append(delta).append("ms) ")
+          .append(_opCode.name())
+          .append(", ").append(name);
+        return sb.toString();
     }
 
     int size() {
