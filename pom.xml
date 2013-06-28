@@ -53,8 +53,9 @@ driver developers who would rather use Maven than Ant as their build tool.
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>com.mongodb.*</Export-Package>
-                        <Export-Package>org.bson.*</Export-Package>
+                        <Export-Package>
+                          org.bson.*;com.mongodb.*;version=2.9.0
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
